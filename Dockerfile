@@ -1,4 +1,4 @@
-FROM debian:buster as builder
+FROM debian:buster as openvas-builder
 
 RUN apt-get update && apt-get install -y \
     cmake \
@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
     libradcli-dev \
     libpcap-dev
 
-ADD https://github.com/greenbone/gvm-libs/archive/v20.8.0.tar.gz gvm-libs-20.8.0.tar.gz
-RUN tar xzf gvm-libs-20.8.0.tar.gz && \
+ADD https://github.com/greenbone/gvm-libs/archive/v20.8.0.tar.gz gvm-libs-20.8.1.tar.gz
+RUN tar xzf gvm-libs-20.8.1.tar.gz && \
     cd gvm-libs-20.8.0 && \
     cmake . && \
     make install
@@ -35,16 +35,15 @@ RUN apt-get update && apt-get install -y \
     redis-server \
     rsync
 
-ADD https://github.com/greenbone/openvas/archive/v20.8.0.tar.gz openvas-20.8.0.tar.gz
-RUN tar xzf openvas-20.8.0.tar.gz && \
-    cd openvas-20.8.0 && \
+ADD https://github.com/greenbone/openvas/archive/v20.8.0.tar.gz openvas-20.8.1.tar.gz
+RUN tar xzf openvas-20.8.1.tar.gz && \
+    cd openvas-scanner-20.8.0 && \
     cmake . && \
     make install && \
     ldconfig
 
 #Fix the sync script so root can run it
 RUN sed -i "/^#\?if.*id \-u.*/,/^#\?fi$/ s/^#*/#/" /usr/local/bin/greenbone-nvt-sync
-
 
 FROM debian:buster
 
@@ -68,8 +67,11 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists/*
 
 
-COPY --from=builder /usr/local /usr/local/.
+COPY --from=openvas-builder /usr/local /usr/local/.
 RUN ldconfig
-RUN /usr/local/bin/greenbone-nvt-sync
+
+# This updates the plugins to community... but takes forever
+#RUN /usr/local/bin/greenbone-nvt-sync
+
 
 
