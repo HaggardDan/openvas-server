@@ -1,6 +1,6 @@
 #! /bin/bash
 
-envsubst << EOF > /usr/local/etc/openvas/openvas.conf
+envsubst > /usr/local/etc/openvas/openvas.conf << EOF
 db_address = $REDIS_URL
 EOF
 
