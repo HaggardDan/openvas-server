@@ -45,7 +45,23 @@ RUN tar xzf openvas-20.8.1.tar.gz && \
 #Fix the sync script so root can run it
 RUN sed -i "/^#\?if.*id \-u.*/,/^#\?fi$/ s/^#*/#/" /usr/local/bin/greenbone-nvt-sync
 
+FROM debian:buster as ospd-builder
+
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    libssl-dev \
+    rustc
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+ADD https://github.com/greenbone/ospd-openvas/archive/refs/tags/v21.4.0.tar.gz ospd-openvas-21.4.0.tar.gz
+RUN pip install ospd-openvas-21.4.0.tar.gz
+
 FROM debian:buster
+
+ENV REDIS_URL="redis:6379"
 
 RUN apt-get update && apt-get install -y \
     libssh-gcrypt-4 \
@@ -64,11 +80,18 @@ RUN apt-get update && apt-get install -y \
     libhiredis0.14 \
     libxml2 \
     libradcli4 \
+    python3 \
+    python3-venv \
+    gettext-base \
  && rm -rf /var/lib/apt/lists/*
 
+ADD start.sh .
 
 COPY --from=openvas-builder /usr/local /usr/local/.
 RUN ldconfig
+
+COPY --from=ospd-builder /opt/venv /opt/venv/.
+ENV PATH="/opt/venv/bin:$PATH"
 
 # This updates the plugins to community... but takes forever
 #RUN /usr/local/bin/greenbone-nvt-sync
