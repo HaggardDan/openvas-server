@@ -1,6 +1,7 @@
 FROM debian:buster as openvas-builder
 
 RUN apt-get update && apt-get install -y \
+    gcc \
     cmake \
     pkg-config \
     libglib2.0-dev \
@@ -8,15 +9,16 @@ RUN apt-get update && apt-get install -y \
     libgnutls28-dev \
     uuid-dev \
     libssh-gcrypt-dev \
-    libldap2-dev \
     libhiredis-dev \
     libxml2-dev \
+    libpcap-dev \
+    libldap2-dev \
     libradcli-dev \
-    libpcap-dev
+    libnet1-dev
 
-ADD https://github.com/greenbone/gvm-libs/archive/v20.8.0.tar.gz gvm-libs-20.8.1.tar.gz
-RUN tar xzf gvm-libs-20.8.1.tar.gz && \
-    cd gvm-libs-20.8.0 && \
+ADD https://github.com/greenbone/gvm-libs/archive/v21.4.0.tar.gz gvm-libs-21.4.0.tar.gz
+RUN tar xzf gvm-libs-21.4.0.tar.gz && \
+    cd gvm-libs-21.4.0 && \
     cmake . && \
     make install
 
@@ -35,9 +37,9 @@ RUN apt-get update && apt-get install -y \
     redis-server \
     rsync
 
-ADD https://github.com/greenbone/openvas/archive/v20.8.0.tar.gz openvas-20.8.1.tar.gz
-RUN tar xzf openvas-20.8.1.tar.gz && \
-    cd openvas-scanner-20.8.0 && \
+ADD https://github.com/greenbone/openvas/archive/v21.4.0.tar.gz openvas-21.4.0.tar.gz
+RUN tar xzf openvas-21.4.0.tar.gz && \
+    cd openvas-scanner-21.4.0 && \
     cmake . && \
     make install && \
     ldconfig
