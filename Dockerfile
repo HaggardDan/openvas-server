@@ -52,9 +52,18 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-venv \
     libssl-dev \
-    rustc
+    rustc \
+# For ARM builds
+    libxslt1-dev \
+    libxml2-dev \
+    libffi-dev \
+    zlib1g-dev
+
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+
+# Also for ARM builds
+RUN pip install wheel
 
 ADD https://github.com/greenbone/ospd-openvas/archive/refs/tags/v21.4.0.tar.gz ospd-openvas-21.4.0.tar.gz
 RUN pip install ospd-openvas-21.4.0.tar.gz
